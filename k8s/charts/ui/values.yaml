@@ -31,11 +31,11 @@ service:
 # Adjust these values based on frontend workload and node capacity.
 resources:
   requests:
-    cpu: "500m"
-    memory: "512Mi"
+    cpu: "1"
+    memory: "2Gi"
   limits:
     cpu: "1"
-    memory: "1Gi"
+    memory: "2Gi" #for demo I have configured limits to same as requests but in prod make sure limits always greater than requests
 
 # ------------------------------------------------------------------------------
 # Ollama Backend Configuration
