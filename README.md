@@ -1,6 +1,6 @@
 # 🚀 Open WebUI + Ollama Cloud Deployment (E2E on AWS EKS)
 
-This project demonstrates a **production-grade deployment** of [Open WebUI](https://github.com/open-webui/open-webui) connected to **Ollama** (running a lightweight LLM such as Mistral) on a **Kubernetes cluster** provisioned via **Terraform** on **AWS EKS**.
+This project demonstrates a **production-grade deployment** of [Open WebUI](https://github.com/open-webui/open-webui) connected to **Ollama** (running a lightweight LLM such as gemma) on a **Kubernetes cluster** provisioned via **Terraform** on **AWS EKS**.
 
 The solution showcases **DevOps automation**, **modular Helm-based deployment**, and **end-to-end orchestration** using a single command (`deploy.sh`).
 
@@ -43,7 +43,7 @@ Ingress (AWS ALB) → exposes Open WebUI to the internet
 
 Open WebUI Pod → provides the chat interface
 
-Ollama Pod → serves LLM inference (e.g., Mistral or Llama )
+Ollama Pod → serves LLM inference (e.g., gemma or Llama )
 
 EBS CSI driver → persistent model storage for Ollama
 
@@ -162,11 +162,33 @@ kubectl get ingress -A
 
 Expected output:
 
-NAMESPACE       NAME                                READY   STATUS    AGE
-default         ollama-deployment-xxxx              1/1     Running   2m
-default         openwebui-deployment-xxxx           1/1     Running   2m
-kube-system     aws-load-balancer-controller-xxxx   1/1     Running   3m
-cert-manager    cert-manager-xxxx                   1/1     Running   2m
+kubectl get pods -A
+
+---------------------------------------------------------------------------------------
+| **NAMESPACE** | **NAME**                          | **READY** | **STATUS** | **AGE** |
+| ------------- | --------------------------------- | --------- | ---------- | ------- |
+| default       | ollama-deployment-xxxx            | 1/1       | Running    | 2m      |
+| default       | openwebui-deployment-xxxx         | 1/1       | Running    | 2m      |
+| kube-system   | aws-load-balancer-controller-xxxx | 1/1       | Running    | 3m      |
+| cert-manager  | cert-manager-xxxx                 | 1/1       | Running    | 2m      |
+----------------------------------------------------------------------------------------
+
+kubectl get svc -A
+
+-----------------------------------------------------------------------------------------------------
+| **NAMESPACE** | **NAME**  | **TYPE**  | **CLUSTER-IP** | **EXTERNAL-IP** | **PORT(S)**   | **AGE** |
+| ------------- | --------- | --------- | -------------- | --------------- | ------------- | ------- |
+| default       | ollama    | ClusterIP | 10.0.0.123     | <none>          | 11434/TCP     | 2m      |
+| default       | openwebui | ClusterIP | 10.0.0.124     | <none>          | 8080/TCP      | 2m      |
+| kube-system   | kube-dns  | ClusterIP | 10.0.0.10      | <none>          | 53/UDP,53/TCP | 3m      |
+------------------------------------------------------------------------------------------------------
+
+kubectl get ingress -A
+----------------------------------------------------------------------------------------------------------------------------------------------
+| **NAMESPACE** | **NAME**          | **CLASS** | **HOSTS** | **ADDRESS (ALB URL)**                                     | **PORTS** | **AGE** |
+| ------------- | ----------------- | --------- | --------- | --------------------------------------------------------- | --------- | ------- |
+| default       | openwebui-ingress | alb       | *         | k8s-openwebui-alb-1234567890.ap-south-1.elb.amazonaws.com | 80        | 1m      |
+-----------------------------------------------------------------------------------------------------------------------------------------------
 
 # 4️⃣ Clean Up Everything
 
@@ -207,9 +229,9 @@ All resources have been safely deleted.
 
 - **ALB readiness delay:** Added retry logic in `deploy.sh` to wait for ingress hostname availability, ensuring stable ALB provisioning.  
 - **EBS StorageClass issue:** Ensured `gp3-csi` is dynamically created and marked as the default StorageClass to support persistent volumes.  
-- **Ollama lightweight model:** Used `mistral:7b` instead of heavier Llama 2 to optimize for faster startup and lower resource utilization.  
+- **Ollama lightweight model:** Used `gemma:2b` instead of heavier Llama 2 to optimize for faster startup and lower resource utilization.  
 - **Namespace consistency:** Parameterized Helm templates to dynamically resolve internal service DNS (`{{ .Release.Name }}-ollama`) across environments.  
-- **Ollama pod resource issue:** Initially, the medium-sized node group caused the Ollama pod to remain in `ContainerCreating` due to insufficient resources. Switching to the lightweight Mistral model resolved the issue.  
+- **Ollama pod resource issue:** Initially, the medium-sized node group caused the Ollama pod to remain in `ContainerCreating` due to insufficient resources. Switching to the lightweight gemma model resolved the issue.  
 - **ALB controller IAM policy:** Encountered failures while creating the ALB because the controller was missing required JSON-based IAM permissions. Added the custom IAM policy (`AWSLoadBalancerControllerIAMPolicy`) via Terraform to fix it.  
 - **ALB 400 error during ingress creation:** Faced a 400 response from AWS Load Balancer Controller while provisioning ALB. After investigation and support from AWS, identified and resolved the issue
 - **Subnet tagging issue:** Initially, subnets were not properly tagged for EKS discovery (`kubernetes.io/role/elb` / `kubernetes.io/role/internal-elb`). Fixed by adding correct tags in the Terraform VPC module.

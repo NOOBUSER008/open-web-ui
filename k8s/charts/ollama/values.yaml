@@ -23,7 +23,7 @@ image:
 # Default model to preload at startup.
 # This can be overridden to use other LLMs such as gemma, llama, or codellama.
 model:
-  name: mistral:7b  # Lightweight model for resource efficiency.
+  name: gemma:2b  # Lightweight model for resource efficiency.
 
 # ------------------------------------------------------------------------------
 # Resource Requests & Limits
@@ -32,10 +32,10 @@ model:
 
 resources:
   requests:
-    cpu: "8"
-    memory: "16Gi"
+    cpu: "6"
+    memory: "12Gi"
   limits:
-    cpu: "8"
+    cpu: "6"
     memory: "16Gi"
 
 # ------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ resources:
 # ------------------------------------------------------------------------------
 # Ensures models are cached locally between pod restarts.
 persistence:
-  enabled: true
+  enabled: false
   size: 30Gi
   storageClass: gp3-csi  # Recommended for AWS EKS (gp3 volumes offer better IOPS per $)
 

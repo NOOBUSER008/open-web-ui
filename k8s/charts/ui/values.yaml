@@ -43,8 +43,7 @@ resources:
 # Points to the Ollama service inside the same Kubernetes cluster.
 # Update this endpoint if your Ollama service is in a different namespace.
 ollama:
-  serviceName: "{{ .Release.Name }}-ollama"
-  port: 11434
+  endpoint: "http://ollama-ollama:11434"
 # ------------------------------------------------------------------------------
 # Ingress Configuration (AWS ALB)
 # ------------------------------------------------------------------------------

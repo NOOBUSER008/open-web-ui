@@ -183,12 +183,31 @@ EOF
   log "Deploying Ollama backend..."
   kubectl create namespace "$HELM_NAMESPACE" >/dev/null 2>&1 || true
   helm upgrade --install ollama "${K8S_BASE_DIR}/ollama" -n "$HELM_NAMESPACE" --wait
-  kubectl -n "$HELM_NAMESPACE" rollout status statefulset/ollama --timeout 300s
+ # Detect Ollama StatefulSet dynamically (works even if fullnameOverride not set)
+  OLLAMA_SS=$(kubectl get statefulset -n "$HELM_NAMESPACE" -l app.kubernetes.io/name=ollama -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "ollama-ollama")
 
+  if [ -n "$OLLAMA_SS" ]; then
+    log "Waiting for Ollama backend rollout to complete..."
+    kubectl -n "$HELM_NAMESPACE" rollout status statefulset/"$OLLAMA_SS" --timeout=300s
+  else
+    log "⚠️  Could not detect Ollama StatefulSet automatically; skipping rollout check."
+  fi
+
+  # ----------------------------------------------------------------------------
+  # Deploy Open WebUI frontend
+  # ----------------------------------------------------------------------------
+  
   log "Deploying Open WebUI frontend..."
   helm upgrade --install openwebui "${K8S_BASE_DIR}/ui" -n "$HELM_NAMESPACE" --wait
-  kubectl -n "$HELM_NAMESPACE" rollout status deployment/openwebui --timeout 300s
+  # Detect Open WebUI Deployment dynamically
+  OPENWEBUI_DEPLOY=$(kubectl get deploy -n "$HELM_NAMESPACE" -l app.kubernetes.io/name=open-webui -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "openwebui-open-webui")
 
+  if [ -n "$OPENWEBUI_DEPLOY" ]; then
+    log "Waiting for Open WebUI frontend rollout to complete..."
+    kubectl -n "$HELM_NAMESPACE" rollout status deployment/"$OPENWEBUI_DEPLOY" --timeout=300s
+  else
+    log "⚠️  Could not detect Open WebUI Deployment automatically; skipping rollout check."
+  fi
   # ----------------------------------------------------------------------------
   # VERIFY INGRESS / ALB DEPLOYMENT
   # ----------------------------------------------------------------------------

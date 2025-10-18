@@ -30,7 +30,7 @@ spec:
           # Environment variable pointing to the Ollama backend
           env:
             - name: OLLAMA_BASE_URL
-              value: "http://{{ .Values.ollama.serviceName }}:{{ .Values.ollama.port }}"
+              value: "{{ .Values.ollama.endpoint }}"
 
           # Resource configuration to control CPU/memory usage
           resources:
