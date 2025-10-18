@@ -1,0 +1,65 @@
+################################################################################
+# 🧱 Terraform
+################################################################################
+# Local Terraform state files
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate
+*.tfstate.*
+
+# Terraform working directory
+.terraform/
+.terraform.lock.hcl
+
+# Terraform plan files
+*.tfplan
+*.tfplan.*
+
+# Sensitive variable files
+terraform.tfvars
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Crash logs
+crash.log
+crash.*.log
+
+################################################################################
+# ☸️ Kubernetes / Helm
+################################################################################
+# Helm release output
+*.tgz
+helmfile.d/
+charts/*/charts/
+
+# Kubeconfig or temp manifests
+kubeconfig
+kubeconfig.yaml
+.kube/
+
+################################################################################
+# 🐚 Shell Scripts & Logs
+################################################################################
+# Local logs, debug outputs, or tmp files
+*.log
+*.tmp
+*.bak
+
+################################################################################
+# 💻 IDE / Editor Files
+################################################################################
+# VSCode 
+.vscode/
+
+################################################################################
+# 🔒 Credentials / Environment
+################################################################################
+# AWS and CLI credentials
+*.pem
+*.key
+*.crt
+*.pub
+*.cer
+*.p12
+*.env
+.env*

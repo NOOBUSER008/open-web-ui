@@ -1,0 +1,61 @@
+################################################################################
+# Default Values — Ollama Helm Chart
+# ------------------------------------------------------------------------------
+# These values configure the Ollama backend deployment.
+# Modify resource requests, model type, and storage options based on workload.
+################################################################################
+
+# ------------------------------------------------------------------------------
+# Deployment Settings
+# ------------------------------------------------------------------------------
+replicaCount: 1  # Number of Ollama pods; increase for high-availability setups.
+
+# ------------------------------------------------------------------------------
+# Container Image
+# ------------------------------------------------------------------------------
+image:
+  repository: ollama/ollama
+  tag: latest
+  pullPolicy: IfNotPresent
+# ------------------------------------------------------------------------------
+# Model Configuration
+# ------------------------------------------------------------------------------
+# Default model to preload at startup.
+# This can be overridden to use other LLMs such as gemma, llama, or codellama.
+model:
+  name: mistral:7b  # Lightweight model for resource efficiency.
+
+# ------------------------------------------------------------------------------
+# Resource Requests & Limits
+# ------------------------------------------------------------------------------
+# Adjust based on model size and node capacity.
+
+resources:
+  requests:
+    cpu: "8"
+    memory: "16Gi"
+  limits:
+    cpu: "8"
+    memory: "16Gi"
+
+# ------------------------------------------------------------------------------
+# Persistent Storage Configuration
+# ------------------------------------------------------------------------------
+# Ensures models are cached locally between pod restarts.
+persistence:
+  enabled: true
+  size: 30Gi
+  storageClass: gp3-csi  # Recommended for AWS EKS (gp3 volumes offer better IOPS per $)
+
+# ------------------------------------------------------------------------------
+# Additional Storage (StatefulSet Volume Template)
+# ------------------------------------------------------------------------------
+# This is used internally by the StatefulSet to define model data volume size.
+storage:
+  size: 30Gi
+
+# ------------------------------------------------------------------------------
+# Naming Overrides (Optional)
+# ------------------------------------------------------------------------------
+nameOverride: ""      # Override chart name (useful for multi-environment deployments)
+fullnameOverride: ""  # Force a specific resource name

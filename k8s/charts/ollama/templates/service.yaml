@@ -1,0 +1,20 @@
+################################################################################
+# Service — Ollama
+# ------------------------------------------------------------------------------
+# Internal ClusterIP service exposing Ollama’s HTTP interface (port 11434).
+# This service is consumed by the Open WebUI component.
+################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ollama.fullname" . }}
+  labels:
+    {{- include "ollama.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "ollama.name" . }}
+  ports:
+    - name: http
+      port: 11434
+      targetPort: 11434
+  type: ClusterIP

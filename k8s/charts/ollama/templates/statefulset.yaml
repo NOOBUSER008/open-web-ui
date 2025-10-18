@@ -1,0 +1,66 @@
+################################################################################
+# StatefulSet — Ollama
+# ------------------------------------------------------------------------------
+# Deploys Ollama as a stateful workload to maintain consistent storage
+# and stable DNS identity. Ideal for model caching and persistent AI runtime state.
+################################################################################
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "ollama.fullname" . }}
+  labels:
+    {{- include "ollama.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "ollama.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "ollama.name" . }}
+  template:
+    metadata:
+      labels:
+        {{- include "ollama.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: ollama
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 11434
+
+          # Environment configuration for Ollama runtime
+          env:
+            - name: OLLAMA_HOST
+              value: "0.0.0.0"
+            - name: OLLAMA_MODELS
+              value: "/data/models"
+
+          # Mount the persistent volume for model storage
+          volumeMounts:
+            - name: ollama-volume
+              mountPath: /data
+
+          # Resource allocation — tuned for lightweight LLM workloads
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          # Lifecycle hook — preload model on container startup
+          # Ensures LLM is available before WebUI connects.
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "ollama pull {{ .Values.model.name }} || true"]  # Preloads the model  at startup; can be replaced with preferred models like Mistral , Gemma or Llama for custom workloads.
+
+
+  # ----------------------------------------------------------------------------
+  # Persistent Volume Template
+  # ----------------------------------------------------------------------------
+  volumeClaimTemplates:
+    - metadata:
+        name: ollama-volume
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: gp3-csi
+        resources:
+          requests:
+            storage: {{ .Values.storage.size | default "30Gi" }}

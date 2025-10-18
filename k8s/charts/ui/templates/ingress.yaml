@@ -1,0 +1,30 @@
+{{- if .Values.ingress.enabled }}
+################################################################################
+# Ingress — Open WebUI (AWS ALB)
+# ------------------------------------------------------------------------------
+# Configures AWS ALB ingress for public access to Open WebUI.
+# Uses annotations for health checks, target groups, and routing rules.
+################################################################################
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "openwebui.fullname" . }}-ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: openwebui
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'  # Configured for HTTP (port 80). For HTTPS, update to include port 443 and specify your ACM certificate ARN.
+    alb.ingress.kubernetes.io/healthcheck-path: /
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: {{ .Values.ingress.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "openwebui.fullname" . }}
+                port:
+                  number: 80
+{{- end }}

@@ -1,0 +1,18 @@
+################################################################################
+# Helm Chart Metadata — Open WebUI
+# ------------------------------------------------------------------------------
+# This chart deploys the Open WebUI frontend, which provides a browser-based 
+# interface to interact with the Ollama backend (LLM runtime).
+# Designed for use with AWS EKS + ALB Ingress.
+################################################################################
+
+apiVersion: v2
+name: open-webui
+description: Helm chart for deploying Open WebUI frontend
+type: application
+
+# Helm chart version — tracks template-level changes
+version: 1.0.0
+
+# Application version — tracks the container version being deployed
+appVersion: "latest"

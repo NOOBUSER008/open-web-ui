@@ -1,0 +1,66 @@
+################################################################################
+# Default Values — Open WebUI Helm Chart
+# ------------------------------------------------------------------------------
+# Configures deployment parameters for the Open WebUI frontend.
+# This service connects to the Ollama backend via OLLAMA_BASE_URL.
+################################################################################
+
+# ------------------------------------------------------------------------------
+# Deployment Configuration
+# ------------------------------------------------------------------------------
+replicaCount: 1  # Scale based on concurrent user load.
+
+# ------------------------------------------------------------------------------
+# Container Image
+# ------------------------------------------------------------------------------
+image:
+  repository: ghcr.io/open-webui/open-webui
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# ------------------------------------------------------------------------------
+# Service Configuration
+# ------------------------------------------------------------------------------
+# Exposes the application internally within the cluster.
+service:
+  port: 8080
+
+# ------------------------------------------------------------------------------
+# Resource Requests & Limits
+# ------------------------------------------------------------------------------
+# Adjust these values based on frontend workload and node capacity.
+resources:
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+  limits:
+    cpu: "1"
+    memory: "1Gi"
+
+# ------------------------------------------------------------------------------
+# Ollama Backend Configuration
+# ------------------------------------------------------------------------------
+# Points to the Ollama service inside the same Kubernetes cluster.
+# Update this endpoint if your Ollama service is in a different namespace.
+ollama:
+  serviceName: "{{ .Release.Name }}-ollama"
+  port: 11434
+# ------------------------------------------------------------------------------
+# Ingress Configuration (AWS ALB)
+# ------------------------------------------------------------------------------
+# Controls external access to the Open WebUI application.
+ingress:
+  enabled: true
+  host: ""   
+  path: /
+
+  # Default uses HTTP listener; update annotations in ingress.yaml to enable HTTPS.
+  # Example:
+  #   - listen-ports: '[{"HTTPS":443},{"HTTP":80}]'
+  #   - certificate-arn: arn:aws:acm:region:account:certificate/your-cert-id
+
+# ------------------------------------------------------------------------------
+# Naming Overrides
+# ------------------------------------------------------------------------------
+nameOverride: ""      # Override chart name (useful for multi-environment deployments)
+fullnameOverride: ""  # Force a specific resource name

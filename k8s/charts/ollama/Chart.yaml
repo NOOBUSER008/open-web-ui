@@ -1,0 +1,18 @@
+################################################################################
+# Helm Chart Metadata — Ollama
+# ------------------------------------------------------------------------------
+# This chart deploys the Ollama backend (LLM runtime) into Kubernetes.
+# It provides a lightweight, persistent inference service that can be
+# connected to Open WebUI for interactive model execution.
+################################################################################
+
+apiVersion: v2
+name: ollama
+description: Helm chart for deploying Ollama backend (LLM runtime)
+type: application
+
+# Chart version — used for tracking changes to chart templates
+version: 1.0.0
+
+# App version — represents the underlying application version
+appVersion: "latest"

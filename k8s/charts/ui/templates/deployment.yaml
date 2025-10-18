@@ -1,0 +1,37 @@
+################################################################################
+# Deployment — Open WebUI
+# ------------------------------------------------------------------------------
+# Deploys the Open WebUI frontend as a stateless web application.
+# It connects to the Ollama backend via environment variable configuration.
+################################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "openwebui.fullname" . }}
+  labels:
+    {{- include "openwebui.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "openwebui.name" . }}
+  template:
+    metadata:
+      labels:
+        {{- include "openwebui.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: open-webui
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+
+          # Environment variable pointing to the Ollama backend
+          env:
+            - name: OLLAMA_BASE_URL
+              value: "http://{{ .Values.ollama.serviceName }}:{{ .Values.ollama.port }}"
+
+          # Resource configuration to control CPU/memory usage
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
